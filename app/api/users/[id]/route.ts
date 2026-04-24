@@ -10,10 +10,10 @@ import type { User } from "@/types";
  */
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
 
     const session = await getSession(req, NextResponse.next());
 
@@ -52,10 +52,10 @@ export async function GET(
  */
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
 
     const session = await getSession(req, NextResponse.next());
 
