@@ -38,7 +38,7 @@ export default function LoginPage() {
         return;
       }
 
-      await axios.post("/login", { email, password });
+      await axios.post("/auth/login", { email, password });
 
       // Redirect after successful login
       router.push("/projects");

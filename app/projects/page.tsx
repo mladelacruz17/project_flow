@@ -23,6 +23,8 @@ import { getDeadlineStatus } from "@/utils/deadlineStatus";
 
 import { Task, Log } from "@/types";
 
+import { usePathname } from "next/navigation";
+
 export default function ProjectsPage() {
   const router = useRouter();
 
@@ -85,6 +87,32 @@ export default function ProjectsPage() {
     }
   }, [selectedProject]);
 
+  const pathname = usePathname();
+
+  // DEV ONLY: keyboard shortcut to reset local database (Ctrl + Alt + R)
+  useEffect(() => {
+    const handler = async (e: KeyboardEvent) => {
+      // Ctrl + Alt + R
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === "r") {
+        const confirmReset = confirm("Reset database?\n\nThis action will erase all current data and restore the database to its initial seed state.");
+
+        if (!confirmReset) return;
+
+        try {
+          await axios.post("/reset-db");
+
+          // refresh logic (adjust based on your app structure)
+          window.location.reload(); // simplest + safest global refresh
+        } catch (err) {
+          console.error("Failed to reset DB", err);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [pathname]);
+
   /**
    * Refetch tasks when project changes
    * Also clears selected task to avoid mismatch
@@ -114,7 +142,7 @@ export default function ProjectsPage() {
    * Logout handler
    */
   const handleLogout = async () => {
-    await axios.post("/logout");
+    await axios.post("/auth/logout");
     router.push("/login");
   };
 

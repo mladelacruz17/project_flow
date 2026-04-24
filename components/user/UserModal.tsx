@@ -23,8 +23,12 @@ export default function UserModal({
   onClose,
   userId,
 }: Props) {
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+
+  const [originalName, setOriginalName] = useState("");
+  const [originalEmail, setOriginalEmail] = useState("");
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -32,8 +36,13 @@ export default function UserModal({
   const [showPasswordCurrent, setShowPasswordCurrent] = useState(false);
   const [showPasswordNew, setShowPasswordNew] = useState(false);
 
+  const [newPasswordError, setNewPasswordError] = useState("");
+
   const [loading, setLoading] = useState(false);
 
+  // -----------------------------
+  // Fetch user data on modal open
+  // -----------------------------
   useEffect(() => {
     const fetchUser = async () => {
       if (!isOpen || !userId) return;
@@ -44,6 +53,10 @@ export default function UserModal({
 
         setName(user.name || "");
         setEmail(user.email || "");
+
+        // Save original values for change detection
+        setOriginalName(user.name || "");
+        setOriginalEmail(user.email || "");
       } catch (err) {
         console.error("Failed to fetch user", err);
       }
@@ -54,8 +67,44 @@ export default function UserModal({
 
   if (!isOpen) return null;
 
+  // Validates password
+  const isValidPassword = (password: string) =>
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /[0-9]/.test(password);
+
+  const isPasswordPairFilled =
+    currentPassword.length > 0 || newPassword.length > 0;
+
+  const isPasswordPairValid =
+    currentPassword.length > 0 && newPassword.length > 0;
+
+  const isNewPasswordValid =
+    !newPassword || isValidPassword(newPassword);
+
+  const isSamePassword =
+    currentPassword &&
+    newPassword &&
+    currentPassword === newPassword;
+
+  const isProfileChanged =
+    name !== originalName || email !== originalEmail;
+
+  const isPasswordBeingChanged =
+    currentPassword.length > 0 || newPassword.length > 0;
+
+  const isSaveDisabled =
+    loading ||
+
+    (isPasswordPairFilled && !isPasswordPairValid) || 
+    !isNewPasswordValid ||                            
+    isSamePassword ||                                 
+
+    (!isProfileChanged && !isPasswordBeingChanged);
+
   const handleSubmit = async () => {
-    if (loading) return;
+    if (isSaveDisabled) return;
 
     setLoading(true);
 
@@ -67,8 +116,10 @@ export default function UserModal({
         newPassword,
       });
 
+      // Reset password fields after successful update
       setCurrentPassword("");
       setNewPassword("");
+
       onClose();
     } catch (err) {
       console.error("Failed to update user", err);
@@ -93,7 +144,7 @@ export default function UserModal({
                    shadow-2xl p-5 text-black dark:text-white"
       >
         {/* Loading Overlay */}
-        {loading && <LoadingScreen text="Saving..." fullScreen={true} />}
+        {loading && <LoadingScreen text="Saving..." fullScreen />}
 
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
@@ -103,9 +154,7 @@ export default function UserModal({
           </div>
 
           <button
-            onClick={() => {
-              if (!loading) onClose();
-            }}
+            onClick={() => !loading && onClose()}
             className="p-1 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-800 transition"
           >
             <X className="w-5 h-5" />
@@ -141,24 +190,16 @@ export default function UserModal({
             <div className="flex items-center gap-2 border border-zinc-200 dark:border-zinc-700
                             rounded-lg px-3 h-10 bg-white/60 dark:bg-zinc-900/40
                             focus-within:ring-2 focus-within:ring-blue-500">
-
               <input
                 type={showPasswordCurrent ? "text" : "password"}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 className="w-full bg-transparent outline-none text-sm"
               />
-
-              <button
-                type="button"
-                onClick={() => setShowPasswordCurrent((v) => !v)}
+              <button onClick={() => setShowPasswordCurrent(v => !v)} type="button"
                 className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
               >
-                {showPasswordCurrent ? (
-                  <EyeClosed className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
+                {showPasswordCurrent ? <EyeClosed className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
               </button>
             </div>
           </FloatingField>
@@ -167,47 +208,81 @@ export default function UserModal({
             <div className="flex items-center gap-2 border border-zinc-200 dark:border-zinc-700
                             rounded-lg px-3 h-10 bg-white/60 dark:bg-zinc-900/40
                             focus-within:ring-2 focus-within:ring-blue-500">
-
               <input
                 type={showPasswordNew ? "text" : "password"}
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setNewPassword(value);
+
+                  if (!value) return setNewPasswordError("");
+                  if (!isValidPassword(value)) {
+                    return setNewPasswordError("Password does not meet requirements");
+                  }
+
+                  setNewPasswordError("");
+                }}
                 className="w-full bg-transparent outline-none text-sm"
               />
-
-              <button
-                type="button"
-                onClick={() => setShowPasswordNew((v) => !v)}
+              <button onClick={() => setShowPasswordNew(v => !v)} type="button"
                 className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
               >
-                {showPasswordNew ? (
-                  <EyeClosed className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
+                {showPasswordNew ? <EyeClosed className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
               </button>
             </div>
           </FloatingField>
 
+          {/* Password errors */}
+          {newPasswordError && (
+            <p className="text-xs text-red-500 mt-1">{newPasswordError}</p>
+          )}
+
+          {isSamePassword && (
+            <p className="text-xs text-red-500">
+              New password must be different from current password
+            </p>
+          )}
+
+          {isPasswordPairFilled && !isPasswordPairValid && (
+            <p className="text-xs text-red-500">
+              Both current and new password are required
+            </p>
+          )}
+
+          {/* Password requirements */}
+          <div className="text-xs mt-2 space-y-1 text-zinc-500 flex justify-center gap-4">
+            <div>
+              <p className={newPassword.length >= 8 ? "text-green-500" : ""}>
+                • At least 8 characters
+              </p>
+              <p className={/[0-9]/.test(newPassword) ? "text-green-500" : ""}>
+                • One number
+              </p>
+            </div>
+            <div>
+              <p className={/[A-Z]/.test(newPassword) ? "text-green-500" : ""}>
+                • One uppercase letter
+              </p>
+              <p className={/[a-z]/.test(newPassword) ? "text-green-500" : ""}>
+                • One lowercase letter
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Actions */}
         <div className="flex justify-end gap-2 mt-5">
-          <button
-            onClick={() => {
-              if (!loading) onClose();
-            }}
-            className="px-3 py-1.5 rounded-lg text-sm
+          <button onClick={() => !loading && onClose()} 
+          className="px-3 py-1.5 rounded-lg text-sm
                        bg-white/60 dark:bg-zinc-900/40
                        border border-zinc-200 dark:border-zinc-700
-                       hover:bg-white dark:hover:bg-zinc-800 transition"
-          >
+                       hover:bg-white dark:hover:bg-zinc-800 transition">
             Cancel
           </button>
 
           <button
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={isSaveDisabled}
             className="px-3 py-1.5 rounded-lg text-sm
                        bg-blue-500 hover:bg-blue-600 text-white transition
                        disabled:opacity-60"

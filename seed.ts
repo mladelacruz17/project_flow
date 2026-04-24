@@ -1,4 +1,6 @@
-{
+import type { DB } from "@/types";
+
+export const seed: DB = {
   "users": [
     {
       "id": "u1",

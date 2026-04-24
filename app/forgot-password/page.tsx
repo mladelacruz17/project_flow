@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
         return;
       }
 
-      await axios.post("/forgot-password", { email });
+      await axios.post("/auth/forgot-password", { email });
 
       // Do NOT reveal if email exists (prevents user enumeration attacks)
       setSuccess("If this email exists, a reset link has been sent.");

@@ -1,36 +1,197 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project Flow – Project Management Tool
+
+## Overview
+
+This is a simple project management application that is built as part of a frontend development assessment. It allows users to manage projects, create tasks, update task status using drag-and-drop, and tracking activity logs.
+
+The goal of this project is to demonstrate:
+- Clean architecture and code organization
+- UI/UX implementation
+- API integration
+- State management and problem-solving skills
+
+---
+
+## Features
+
+### Authentication
+- User signup and login
+- Session-based authentication using cookies
+- Forgot password and reset password
+
+### Project Management
+- Create, update, and delete projects
+- View all projects in a sidebar
+- Project deadline status indicator:
+    - Today (green)
+    - Near 30 days (orange)
+    - Overdue (red)
+    - Default (gray)
+- Sort projects by deadline (ascending/descending)
+- Search projects
+- View selected project details
+
+### Task Management
+- Create, update, and delete tasks within projects
+- Drag-and-drop task status updates:
+    - To Do
+    - In Progress
+    - Done
+- Sort tasks by creation date within each column
+
+### History Logs
+- Tracks project and task changes:
+    - Project creation and updates
+    - Task creation and updates
+    - Task status changes
+    - Task Deletions
+
+### Additional Features
+- Clean, modern SaaS-style dashboard UI
+- Reusable utility functions
+- Modular and maintainable code structure
+
+---
+
+## Tech Stack
+
+- **Framework**: Next.js (App Router)
+- **Styling**: Tailwind CSS
+- **HTTP Client**: Axios
+- **Drag-and-drop**: @dnd-kit
+- **Session Management**: iron-session
+- **Database**: JSON file (mock backend)
+- **Email Service**: Resend (password reset functionality)
+
+---
+
+## Project Structure
+```bash
+/app – pages and API routes
+/components – reusable UI and feature-based components
+/lib – core logic (db, session, logger, email)
+/utils – helper functions (date, deadline status)
+/types – TypeScript types
+```
+
+---
 
 ## Getting Started
 
-First, run the development server:
-
+### 1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/mladelacruz17/project_flow.git
+cd project_flow
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Setup environment variables
+Create a .env.local file
+```bash
+SESSION_SECRET=your_secret_key
+RESEND_API_KEY=your_api_key
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Run the development server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000)
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## API Endpoints
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Authentication
+- POST /api/auth/login – Login user
+- POST /api/auth/logout – Logout user
+- POST /api/auth/forgot-password – Send reset link
+- POST /api/auth/reset-password – Reset password
+- GET /api/session - Get session
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Projects
+- GET /api/projects – Get all projects of a user
+- POST /api/projects – Create project
+- PATCH /api/projects/:id – Update project
+- DELETE /api/projects/:id – Delete project
 
-## Deploy on Vercel
+### Tasks
+- GET /api/tasks – Get all tasks of a project
+- POST /api/tasks – Create task
+- PUT /api/tasks/:id – Update task (status/details)
+- DELETE /api/tasks/:id – Delete task
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Logs
+- GET /api/logs – Get logs of a project
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Users
+- GET /api/users/:id – Get user details
+- POST /api/users – Create user / Signup
+- PUT /api/users/:id – Update user details
+
+### Development (Dev Only)
+- POST /api/reset-db – Reset database to seed data (used for development/testing only)
+
+---
+
+## Known Limitations
+
+- **Uses a JSON file instead of a real database**
+Data is stored in a local JSON file, which is suitable for development and demonstration purposes but not scalable for production use.
+
+- **No collaborative features (single-user data scope)**
+Projects and tasks are isolated per user account and are not shared across users. This application does not support collaboration or shared workspaces.
+
+- **No real-time synchronization** 
+Updates rely on client-side state and API calls, without real-time technologies such as WebSockets.
+
+- **Basic validation only**
+Input validation is minimal and does not cover all edge cases. More robust validation (e.g., schema-based validation) can be added.
+
+- **Basic responsiveness**
+Some layouts are optimized for desktop screens only. Mobile responsiveness was not fully implemented due to time constraints.
+
+---
+
+## Future Improvements
+- Improve mobile responsiveness (fully responsive UI)
+- Replace JSON DB with PostgreSQL/MongoDB
+- Add real-time updates (WebSockets)
+- Improve form validation (Zod/Yup)
+- Add user roles and permissions
+- Deploy to Vercel
+
+---
+
+## Developer Tools
+
+To improve development workflow, this project includes a hidden utility for quickly resetting local data.
+
+- **Database Reset Shortcut**
+  - Trigger: `Ctrl + Alt + R`
+  - Scope: Available on the `/project` page
+  - Action: Calls `/api/reset-db` and reloads the application state
+  - Purpose: Quickly restore seed data during development and testing
+  - Environment: Development only (not exposed in production)
+
+### Demo Account
+
+A test user is preloaded for evaluation purposes:
+
+- Email: mladc17@gmail.com  
+- Password: sample  
+
+> This account is intended for development and demo use only.
+
+---
+
+Notes:
+This project was completed within the given timeframe, with an extension to further refine features and improve overall quality.
+
+
+Author
+Developed by Ma. Lilibeth A. Dela Cruz
