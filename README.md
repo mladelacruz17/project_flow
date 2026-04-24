@@ -12,6 +12,24 @@ The goal of this project is to demonstrate:
 
 ---
 
+## Live Demo
+
+A deployed version of the application is available on Vercel:
+
+[https://project-flow-ashy.vercel.app/](https://project-flow-ashy.vercel.app/)
+
+> Note on Data Persistence (Deployment Limitation)
+
+This application currently uses a JSON file as a mock database.  
+Because Vercel serverless deployments do not persist file system changes, any newly created or updated data will reset upon page refresh or redeployment.
+
+The application works normally when cloned and run locally, where data persistence is maintained during the session/runtime
+
+### Planned Improvement
+Future improvement includes migrating from a JSON-based mock database to PostgreSQL or MongoDB for persistent storage and production deployment readiness.
+
+---
+
 ## Features
 
 ### Authentication
@@ -166,7 +184,6 @@ Some layouts are optimized for desktop screens only. Mobile responsiveness was n
 - Add real-time updates (WebSockets)
 - Improve form validation (Zod/Yup)
 - Add user roles and permissions
-- Deploy to Vercel
 
 ---
 
