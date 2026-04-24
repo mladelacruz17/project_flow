@@ -95,6 +95,9 @@ Create a .env.local file
 SESSION_SECRET=your_secret_key
 RESEND_API_KEY=your_api_key
 ```
+Get Resend API key from [https://resend.com/](https://resend.com/).
+> Note: The email service uses Resend for sending password reset emails.
+> For development, ensure that the recipient email exists in the user database to properly receive reset links.
 
 ### 4. Run the development server
 ```bash
